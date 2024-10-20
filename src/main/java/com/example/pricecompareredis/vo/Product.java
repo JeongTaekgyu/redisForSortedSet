@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class Product {
 
-    private String prodGrpId; // p00001
+    private String prodGrpId; // zset_products
 
-    private String productId; //
+    private String productId; // ex) p0001
 
     private int price; // 25000 (won)
 

@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class ProductGrp {
 
-    private String prodGrpId; // FPG0001
+    private String prodGrpId; // zset_products
 
-    private List<Product> productList; // [{ , 25000}, {}...]
+    private List<Product> productList; // ex) [{p0001 , 25000}, {}...]
 }
