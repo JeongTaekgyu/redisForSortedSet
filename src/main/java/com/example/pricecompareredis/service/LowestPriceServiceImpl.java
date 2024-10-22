@@ -75,18 +75,24 @@ public class LowestPriceServiceImpl implements LowestPriceService {
     public List<ProductGrp> getProductGrpUsingKeyword(String keyword){
 
         List<ProductGrp> returnInfo = new ArrayList<>();
-        ProductGrp tempProdGrp = new ProductGrp();
+
         // input 받은 keyword로 productGroupId를 조회
         // Set을 다루기 귀찮아서 List 다룬다.
         List<String> prodGrpIdList = new ArrayList<>();
         // id만 받으면 되니까 range로 10개만 받아온다.
-        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().range(keyword, 0, 9));
-        Product tempProduct = new Product();
+        // range는 작은 순부터 큰순으로, reverseRange는 작은순 부터 큰순으로
+        // 스코어가 높은 데이터가 일치되는 데이터? 이기 때문에 높은 순서로 뽑히도록 reverseRange를 사용한다.
+        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().reverseRange(keyword, 0, 9));
+//        prodGrpIdList = List.copyOf(myProdPriceRedis.opsForZSet().range(keyword, 0, -1));
+//        Product tempProduct = new Product();
+        System.out.println("~~~ prodGrpIdList: \n"+ prodGrpIdList);
         List<Product> tempProdList = new ArrayList<>();
 
         // 10개 prodGrpId로 loop
         for(final String prodGrpId:prodGrpIdList){
             // Loop 돌면서 ProductGroupId 로 Product:price 가져오기 (10개)
+            ProductGrp tempProdGrp = new ProductGrp();
+
             Set prodAndPriceList = new HashSet();
             prodAndPriceList = myProdPriceRedis.opsForZSet().rangeWithScores(prodGrpId, 0, 9);
 
@@ -96,12 +102,13 @@ public class LowestPriceServiceImpl implements LowestPriceService {
             while (prodPriceObj.hasNext()){
                 ObjectMapper objMapper = new ObjectMapper();
                 // ex) {"value":"p0001","score":25000}
-
-                Map<String, String> prodPriceMap = objMapper.convertValue(prodPriceObj.next(), Map.class);
+                Map<String, Object> prodPriceMap = objMapper.convertValue(prodPriceObj.next(), Map.class);
+                Product tempProduct = new Product();
 
                 // Product Obj에 bind
-                tempProduct.setProductId(prodPriceMap.get("value"));
-                tempProduct.setPrice(Integer.parseInt(prodPriceMap.get("score")));
+                tempProduct.setProductId(prodPriceMap.get("value").toString()); // prod_id
+                tempProduct.setPrice(Double.valueOf(prodPriceMap.get("score").toString()).intValue()); // 엘라스틱서치에서 검색된 score
+//                tempProduct.setPrice(Integer.parseInt(prodPriceMap.get("score"))); // 엘라스틱서치에서 검색된 score
                 tempProdList.add(tempProduct);
             }
             // 10개의 Product price 입력완료
