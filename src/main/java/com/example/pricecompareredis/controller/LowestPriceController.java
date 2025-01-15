@@ -69,7 +69,7 @@ public class LowestPriceController {
         return lowestPriceService.setNewProduct(newProduct);
     }
 
-    // 상품 그룹 추가
+    // 상품 그룹을 추가하고 해당 상품 그룹 내 상품 수를 반환한다.
     @PutMapping("/productGroup")
     public int SetNewProduct(@RequestBody ProductGrp newProductGrp) {
         return lowestPriceService.setNewProductGrp(newProductGrp);
@@ -82,7 +82,7 @@ public class LowestPriceController {
         return lowestPriceService.setNewProductGrpToKeyword(keyword, prodGrpId, score);
     }
 
-    // 특정 키워드를 통해 해당 키워드와 연관된 최저가 상품 정보를 조회하고 반환
+    // 특정 키워드를 통해 해당 키워드와 연관된 최저가 상품 정보를 조회하고 반환(키워드 객체가 반환)
     @GetMapping("/productPrice/lowest")
     public Keyword getLowestPriceProductByKeyword(String keyword) {
         return lowestPriceService.getLowestPriceProductByKeyword(keyword);

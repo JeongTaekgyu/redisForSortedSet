@@ -21,6 +21,7 @@ public class LowestPriceServiceImpl implements LowestPriceService {
     public Set getZsetValue(String key) {
         Set myTempSet = new HashSet();
 
+        // ZSet에서 인덱스 0부터 9까지의 원소와 점수를 포함한 데이터를 점수의 오름차순으로 반환한다.(내림 차순은 reverseRange 관련 메서드를 사용)
         myTempSet = myProdPriceRedis.opsForZSet().rangeWithScores(key, 0, 9);
 
         return myTempSet;
@@ -45,6 +46,7 @@ public class LowestPriceServiceImpl implements LowestPriceService {
     };
 
     public int setNewProduct(Product newProduct) {
+        // 상품 정보를 Redis의 정렬된 집합에 추가하고, 추가된 상품의 순위를 조회하여 반환한다.
         int rank;
         myProdPriceRedis.opsForZSet().add(newProduct.getProdGrpId(), newProduct.getProductId(), newProduct.getPrice());
         // RedisTemplate myProdPriceRedis.opsForZSet() 에 있는 rank메서드 자체가 반환형이 Long이기 때문에 intValue()로 형변환을 해준다.
@@ -52,6 +54,7 @@ public class LowestPriceServiceImpl implements LowestPriceService {
         return rank;
     }
 
+    // 상품 그룹을 추가하고 해당 상품 그룹 내 상품 수를 반환한다.
     public int setNewProductGrp(ProductGrp newProductGrp) {
         // 상품 리스트를 가져온다.
         List<Product> productList = newProductGrp.getProductList();
@@ -77,12 +80,15 @@ public class LowestPriceServiceImpl implements LowestPriceService {
         return rank;
     }
 
+    // 최저 가격 상품의 정보를 담은 Keyword 객체가 반환된다.
     public Keyword getLowestPriceProductByKeyword(String keyword){
         Keyword returnInfo = new Keyword();
-        List<ProductGrp> tempProdGrp = new ArrayList<>();
         // keyword를 통해 ProductGroup 가져오기 (10개)
-        tempProdGrp = getProductGrpUsingKeyword(keyword);
+        List<ProductGrp> tempProdGrp = new ArrayList<>();
+
+        // 키워드를 사용하여 관련 상품그룹을 조회
         // Loop 타면서 ProductGroup 으로 Product:price 가져오기
+        tempProdGrp = getProductGrpUsingKeyword(keyword);
 
         // 가져온 정보들을 Return할 Object에 넣기
         returnInfo.setKeyword(keyword);
@@ -92,6 +98,7 @@ public class LowestPriceServiceImpl implements LowestPriceService {
         return returnInfo;
     }
 
+    // 키워드에 해당하는 모든 상품 그룹과 그 내부의 상품 정보가 포함된 ProductGrp 객체 리스트를 반환한다.
     public List<ProductGrp> getProductGrpUsingKeyword(String keyword){
 
         List<ProductGrp> returnInfo = new ArrayList<>();
